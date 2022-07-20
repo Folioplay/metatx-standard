@@ -367,6 +367,8 @@ function App() {
                 <div className="mb-wrap mb-style-2">
                     <blockquote cite="http://www.gutenberg.org/ebboks/11">
                         <p>{quote}</p>
+                        <br></br>
+                        <p>Please change to Ethers_Custom_EIP712Sign page as that is configured to mumbai by Arjun</p>
                     </blockquote>
                 </div>
 

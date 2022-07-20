@@ -20,12 +20,14 @@ let sigUtil = require("eth-sig-util");
 
 let config = {
     contract: {
-        address: "0x853bfD0160d67DF13a9F70409f9038f6473585Bd",
+        // address: "0x853bfD0160d67DF13a9F70409f9038f6473585Bd", //kovan
+        address: "0x5CA4d1259b83eF56ebDC2978A358758BD0b4161a", //mumbai
         abi: [{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"userAddress","type":"address"},{"indexed":false,"internalType":"addresspayable","name":"relayerAddress","type":"address"},{"indexed":false,"internalType":"bytes","name":"functionSignature","type":"bytes"}],"name":"MetaTransactionExecuted","type":"event"},{"inputs":[{"internalType":"address","name":"userAddress","type":"address"},{"internalType":"bytes","name":"functionSignature","type":"bytes"},{"internalType":"bytes32","name":"sigR","type":"bytes32"},{"internalType":"bytes32","name":"sigS","type":"bytes32"},{"internalType":"uint8","name":"sigV","type":"uint8"}],"name":"executeMetaTransaction","outputs":[{"internalType":"bytes","name":"","type":"bytes"}],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getNonce","outputs":[{"internalType":"uint256","name":"nonce","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getQuote","outputs":[{"internalType":"string","name":"currentQuote","type":"string"},{"internalType":"address","name":"currentOwner","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"quote","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"string","name":"newQuote","type":"string"}],"name":"setQuote","outputs":[],"stateMutability":"nonpayable","type":"function"}]
     },
     apiKey: {
         test: "cNWqZcoBb.4e4c0990-26a8-4a45-b98e-08101f754119",
-        prod: "8nvA_lM_Q.0424c54e-b4b2-4550-98c5-8b437d3118a9"
+        // prod: "8nvA_lM_Q.0424c54e-b4b2-4550-98c5-8b437d3118a9", //kovan
+        prod: "69n5LsSRU.639bd261-14e6-437c-9562-b75fa329de8f" //mumbai
     }
 }
 
@@ -47,7 +49,8 @@ let domainData = {
     name: "TestContract",
     version: "1",
     verifyingContract: config.contract.address,
-    salt: ethers.utils.hexZeroPad((ethers.BigNumber.from(42)).toHexString(), 32)
+    // salt: ethers.utils.hexZeroPad((ethers.BigNumber.from(42)).toHexString(), 32), //kovan
+    salt: ethers.utils.hexZeroPad((ethers.BigNumber.from(80001)).toHexString(), 32), //mumbai
 };
 
 let ethersProvider,walletProvider, walletSigner;
@@ -104,7 +107,8 @@ function App() {
                 await provider.enable();
                 setLoadingMessage("Initializing Biconomy ...");
                 // We're creating biconomy provider linked to your network of choice where your contract is deployed
-                biconomy = new Biconomy(new ethers.providers.JsonRpcProvider("https://kovan.infura.io/v3/d126f392798444609246423b06116c77"),
+                // biconomy = new Biconomy(new ethers.providers.JsonRpcProvider("https://kovan.infura.io/v3/d126f392798444609246423b06116c77"), //kovan
+                biconomy = new Biconomy(new ethers.providers.JsonRpcProvider("https://matic-mumbai.chainstacklabs.com"), //mumbai
                     { apiKey: config.apiKey.prod, debug: true });
 
                 /*
@@ -345,6 +349,7 @@ function App() {
         try {
             showInfoMessage(`Sending transaction via Biconomy`);
             let tx = await contract.executeMetaTransaction(userAddress, functionData, r, s, v);
+            console.log(tx)
             showInfoMessage(`Transaction sent. Waiting for confirmation ..`)
             await tx.wait(1);
             console.log("Transaction hash : ", tx.hash);
@@ -398,7 +403,7 @@ function App() {
                 {transactionHash !== "" && <Box className={classes.root} mt={2} p={2}>
                     <Typography>
                         Check your transaction hash
-            <Link href={`https://kovan.etherscan.io/tx/${transactionHash}`} target="_blank"
+            <Link href={`https://mumbai.polygonscan.com/tx/${transactionHash}`} target="_blank"
                             className={classes.link}>
                             here
             </Link>

@@ -25,6 +25,7 @@ import Ethers_Forward_PersonalSign from './components/Ethers_Forward_PersonalSig
 import Ethers_Forward_AllTokens from './components/Ethers_Forward_AllTokens';
 import Gas_Estimation_Exercise from './components/Gas_Estimation_Exercise';
 import Ethers_SCW_EIP712Sign from './components/Ethers_SCW_EIP712Sign';
+import TransferErc20 from "./components/transferERC20";
 
 import "./App.css";
 import Button from "@material-ui/core/Button";
@@ -119,6 +120,8 @@ function App() {
           <Tab label="Ethers + Forward + All Tokens" {...a11yProps(16)} />
           <Tab label="Gas + Estimation + Mainnet + Exercise" {...a11yProps(17)} />
           <Tab label="Ethers + SCW + EIP712 Sign" {...a11yProps(18)}/>
+          <Tab label="Ethers + transfer" {...a11yProps(19)}/>
+
 
           {/*To Be Added
              Ethers + Forward + Personal Sign
@@ -184,6 +187,9 @@ function App() {
         </TabPanel>
         <TabPanel value={value} index={18}>
           <Ethers_SCW_EIP712Sign />
+        </TabPanel>
+        <TabPanel value={value} index={19}>
+          <TransferErc20 />
         </TabPanel>
 
       </div>

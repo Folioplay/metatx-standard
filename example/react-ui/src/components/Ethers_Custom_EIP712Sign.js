@@ -152,6 +152,7 @@ function App() {
     const onSubmitWithEIP712Sign = async event => {
         if (newQuote != "" && contract) {
             setTransactionHash("");
+            console.log("metatxnenabed",metaTxEnabled);
             if (metaTxEnabled) {
                 showInfoMessage(`Getting user signature`);
                 let userAddress = selectedAddress;

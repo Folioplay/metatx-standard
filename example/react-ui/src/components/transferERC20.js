@@ -294,6 +294,9 @@ function TransferERC20() {
     const [metaTxEnabled, setMetaTxEnabled] = useState(true);
     const [transactionHash, setTransactionHash] = useState("");
     const [orderString, setOrderString] = useState();
+    const [tokenAddress, setTokenAddress] = useState("");
+    const [receiversAddress, setReceiversAddress] = useState("");
+    const [transferAmount, setTransferAmount] = useState("");
 
     const handleClose = () => {
         setBackdropOpen(false);
@@ -412,7 +415,7 @@ function TransferERC20() {
                 showInfoMessage(`Getting user signature`);
                 let userAddress = selectedAddress;
                 let nonce = await contract.getNonce(userAddress);
-                let functionSignature = contractInterface.encodeFunctionData("transfer", ["0x0000000000000000000000000000000000001010", "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", ethers.utils.parseEther("1")]);
+                let functionSignature = contractInterface.encodeFunctionData("transfer", [tokenAddress, receiversAddress, ethers.utils.parseEther(transferAmount)]);
                 // let functionSignature = contractInterface.encodeFunctionData(<Insert Values>);
                 let message = {};
                 message.nonce = parseInt(nonce);
@@ -673,13 +676,16 @@ function TransferERC20() {
             <section>
                 <div className="submit-container">
                     <div className="submit-row">
+                        <div>
                         <input
+                            style={{ marginTop: "10px" }}
                             type="text"
                             placeholder="Enter your quote"
                             onChange={onQuoteChange}
                             value={newQuote}
                         />
                             <input
+                                style={{ marginTop: "10px" }}
                                 type="text"
                                 placeholder="Enter your order string"
                                 onChange={(e)=> setOrderString(e.target.value)}
@@ -688,10 +694,31 @@ function TransferERC20() {
                         <Button variant="contained" color="primary" onClick={onSubmitWithEIP712Sign} style={{ marginLeft: "10px" }}>
                             Create Order
                         </Button>
+                        </div>
+                        <div>
+                        <input
+                            style={{ marginTop: "10px" }}
+                            type="text"
+                            placeholder="Enter token address"
+                            onChange={(e)=> setTokenAddress(e.target.value)}
+                        />
+                        <input
+                            style={{ marginTop: "10px" }}
+                            type="text"
+                            placeholder="Enter your receiver's address"
+                            onChange={(e)=> setReceiversAddress(e.target.value)}
+                        />
+                        <input
+                            style={{ marginTop: "10px" }}
+                            type="text"
+                            placeholder="Enter your transfer amount"
+                            onChange={(e)=> setTransferAmount(e.target.value)}
+                        />
 
                         <Button variant="contained" color="primary" onClick={onSubmitWithEIP712SignTransfer} style={{ marginLeft: "10px" }}>
                             Transfer
                         </Button>
+                        </div>
 
                         <Button variant="contained" color="secondary" onClick={onSubmitWithPrivateKey} style={{ marginLeft: "10px" }}>
                             Submit (Private Key)

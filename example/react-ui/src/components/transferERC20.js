@@ -293,6 +293,7 @@ function TransferERC20() {
     const [selectedAddress, setSelectedAddress] = useState("");
     const [metaTxEnabled, setMetaTxEnabled] = useState(true);
     const [transactionHash, setTransactionHash] = useState("");
+    const [orderString, setOrderString] = useState();
 
     const handleClose = () => {
         setBackdropOpen(false);
@@ -364,7 +365,8 @@ function TransferERC20() {
                 showInfoMessage(`Getting user signature`);
                 let userAddress = selectedAddress;
                 let nonce = await contract.getNonce(userAddress);
-                let functionSignature = contractInterface.encodeFunctionData("createOrder", [["btc"]]);
+                console.log("ordervalue", orderString);
+                let functionSignature = contractInterface.encodeFunctionData("createOrder", [[orderString]]);
                 let message = {};
                 message.nonce = parseInt(nonce);
                 message.from = userAddress;
@@ -383,6 +385,54 @@ function TransferERC20() {
                 // Its important to use eth_signTypedData_v3 and not v4 to get EIP712 signature because we have used salt in domain data
                 // instead of chainId
                 let signature = await walletProvider.send("eth_signTypedData_v3", [userAddress, dataToSign])
+                let { r, s, v } = getSignatureParameters(signature);
+                sendSignedTransaction(userAddress, functionSignature, r, s, v);
+            } else {
+                console.log("Sending normal transaction");
+                let tx = await contract.create(newQuote);
+                console.log("Transaction hash : ", tx.hash);
+                showInfoMessage(`Transaction sent by relayer with hash ${tx.hash}`);
+                let confirmation = await tx.wait();
+                console.log(confirmation);
+                setTransactionHash(tx.hash);
+
+                showSuccessMessage("Transaction confirmed on chain");
+                getQuoteFromNetwork();
+            }
+        } else {
+            showErrorMessage("Please enter the quote");
+        }
+    };
+
+    const onSubmitWithEIP712SignTransfer = async event => {
+        if (newQuote != "" && contract) {
+            setTransactionHash("");
+            console.log("metatxnenabed",metaTxEnabled);
+            if (metaTxEnabled) {
+                showInfoMessage(`Getting user signature`);
+                let userAddress = selectedAddress;
+                let nonce = await contract.getNonce(userAddress);
+                let functionSignature = contractInterface.encodeFunctionData("transfer", ["0x0000000000000000000000000000000000001010", "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", ethers.utils.parseEther("1")]);
+                // let functionSignature = contractInterface.encodeFunctionData(<Insert Values>);
+                let message = {};
+                message.nonce = parseInt(nonce);
+                message.from = userAddress;
+                message.functionSignature = functionSignature;
+
+                const dataToSign = JSON.stringify({
+                    types: {
+                        EIP712Domain: domainType,
+                        MetaTransaction: metaTransactionType
+                    },
+                    domain: domainData,
+                    primaryType: "MetaTransaction",
+                    message: message
+                });
+
+                // Its important to use eth_signTypedData_v3 and not v4 to get EIP712 signature because we have used salt in domain data
+                // instead of chainId
+                let signature = await walletProvider.send("eth_signTypedData_v3", [userAddress, dataToSign])
+                console.log("data to sign",dataToSign)
                 let { r, s, v } = getSignatureParameters(signature);
                 sendSignedTransaction(userAddress, functionSignature, r, s, v);
             } else {
@@ -584,7 +634,7 @@ function TransferERC20() {
                     <span className="label-value">ethers.js</span>
                 </div>
                 <div className="top-row-item">
-                    <span className="label">Meta Transaction</span>
+                    <span className="label">Meta Transaction</span>(change line 367)
                     <span className="label-value">Custom Approach</span>
                 </div>
                 <div className="top-row-item">
@@ -629,8 +679,18 @@ function TransferERC20() {
                             onChange={onQuoteChange}
                             value={newQuote}
                         />
+                            <input
+                                type="text"
+                                placeholder="Enter your order string"
+                                onChange={(e)=> setOrderString(e.target.value)}
+                                // value={newQuote}
+                            />
                         <Button variant="contained" color="primary" onClick={onSubmitWithEIP712Sign} style={{ marginLeft: "10px" }}>
-                            Submit
+                            Create Order
+                        </Button>
+
+                        <Button variant="contained" color="primary" onClick={onSubmitWithEIP712SignTransfer} style={{ marginLeft: "10px" }}>
+                            Transfer
                         </Button>
 
                         <Button variant="contained" color="secondary" onClick={onSubmitWithPrivateKey} style={{ marginLeft: "10px" }}>
